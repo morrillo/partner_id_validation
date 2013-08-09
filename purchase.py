@@ -19,19 +19,23 @@
 #
 ##############################################################################
 
-{
-    'name': 'partner_id_validation',
-    'version': '0.1',
-    'category': 'General',
-    'description': "Module that validates that sale orders, purchase orders and invoices are assigned a partner that is a company.",
-    'author': 'Moldeo Interactive',
-    'website': 'http://business.moldeo.coop/',
-    'images': [],
-    'depends': ['sale','account','purchase'],
-    'demo': [],
-    'data': [],
-    'test': [],
-    'installable': True,
-}
+from openerp.osv import fields, osv
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+class purchase_order(osv.osv):
+
+    _name = 'purchase.order'
+    _inherit = 'purchase.order'
+
+    def _check_partner_company(self, cr, uid, ids, context=None):
+        obj = self.browse(cr, uid, ids[0], context=context)
+        if not obj.partner_id.is_company:
+            return False
+        return True
+
+    _constraints = [
+        (_check_partner_company, 'Partner has to be a company.', ['partner_id']),
+    ]
+
+
+purchase_order()
+
